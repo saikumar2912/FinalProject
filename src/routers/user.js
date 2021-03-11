@@ -4,7 +4,8 @@ const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const User=require('../model/User');
-
+const Skill=require('../model/Skills')
+const Bit =require('../model/Bit');
 router.post('/',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
@@ -24,6 +25,8 @@ router.post('/',(req, res) => {
 
     })
 });
+
+
 router.post('/login',(req,res)=>{
     var username= req.body.username
     var password=req.body.password
@@ -58,6 +61,32 @@ router.post('/login',(req,res)=>{
     })
 });
 
+router.post('/addskills',async(req,res)=>{
+const newSkill=new Skill(req.body);
+ 
+try{
+    await newSkill.save()
+    res.status(201).send(newSkill);
+    }
+    catch(err){
+        res.status(500).send()
+    }
 
+});
+router.post('/:id/addbit', async (req, res) => {
+	const newBit = new Bit(req.body);
+	const  skillId = req.params.id;
+	try {
+		const user = await Skill.findById(skillId);
+		if (!user) {
+			return res.status(404).send({ error: 'User not found' });
+		}
+		newBit.skillId = user.id;
+		await newBit.save();
+		res.status(201).send(newBit);
+	} catch (err) {
+		res.status(500).send();
+	}
+});
 
 module.exports = router;
