@@ -4,8 +4,6 @@ const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const User=require('../model/User');
-const Skill=require('../model/Skills')
-const Bit =require('../model/Bit');
 router.post('/',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
@@ -13,7 +11,7 @@ router.post('/',(req, res) => {
                 error:err
             })
         }
-        let user=new User({
+        const user=new User({
             name:req.body.name,
             age:req.body.age,
             email:req.body.email,
@@ -28,10 +26,10 @@ router.post('/',(req, res) => {
 
 
 router.post('/login',(req,res)=>{
-    var username= req.body.username
+    var username=req.body.username
     var password=req.body.password
 
-    User.findOne({$or:[{email:username}]})
+    User.findOne({email:username})
     .then(user=>{
         if(user){
             bcrypt.compare(password,user.password,function(err,result){
@@ -42,10 +40,8 @@ router.post('/login',(req,res)=>{
                 }
                 if(result){
                     let token =jwt.sign({name:user.name},'verySecret',{expiresIn:'1h'})
-                    res.json({
-                        message:"login succesfully",
-                        token
-                    })
+                    res.send("login sucessful");
+                    token
                 }else{
                     res.json({
                         message:'password does not match'
@@ -59,6 +55,31 @@ router.post('/login',(req,res)=>{
             })
         }
     })
+});
+
+router.post('/getuser',async (req,res)=>{
+    try{
+        const user = await User.find()
+        const userdetails=user.map((e)=>{
+            if(e._id==req.body._id){
+                return({
+                    _id:e._id,
+                        name:e.name,
+                        age:e.age,
+                        email:e.email,
+                        password:e.password,
+                        skill:[]
+                 })
+            }
+        })
+        
+          res.status(200).send(userdetails)
+        }
+        
+        catch (err) {
+			res.status(500).send("not found");
+		}
+
 });
 
 module.exports = router;
