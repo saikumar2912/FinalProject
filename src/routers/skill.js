@@ -2,37 +2,20 @@ const express = require('express');
 
 const router =express.Router();
 
-const Skill=require('../model/Skills')
-const User=require('../model/User');
+const Skill=require('../Model/Skill')
+const Bit =require('../Model/Bit')
+  //add a skill
+    router.post('/addskill', async (req, res) => {
+        //const newskill = new Skill(req.body);
+	try {
+		const skill1=await Skill.create(req.body);
+        res.send(skill1)
+	} catch (err) {
+		res.status(500).send();
+	}
+       });  
 
-router.post('/addskills',async(req,res)=>{
-    const newSkill=new Skill(req.body);
-     
-    try{
-        await newSkill.save()
-        res.status(201).send(newSkill);
-        }
-        catch(err){
-            res.status(500).send()
-        }
-    
-    });
-
-    router.post('/:id/addskill', async (req, res) => {
-        const newSkill = new Skill(req.body);
-        const  userId = req.params.id;
-        try {
-            const user = await User.findById(userId);
-            if (!user) {
-                return res.status(404).send({ error: 'User not found' });
-            }
-            newSkill.userId = user.id;
-            await newSkill.save();
-            res.status(201).send(newSkill);
-        } catch (err) {
-            res.status(500).send();
-        }
-    });
+    //to display all skills   
     router.post('/skills', async (req, res) => {
         
         try {
@@ -43,25 +26,55 @@ router.post('/addskills',async(req,res)=>{
             res.status(404).send({ error: 'Path not found' });
         }
     });
-    router.post('/getskill', async (req,res) => {
-       try{
-           const skill=await Skill.find()
-           const skilldetails= skill.map((e)=>{
-               if(e.Title==req.body.Title){
-                   return({
-                    _id:e_id,
-                    Title:e.Title,
-                    Description:e.Description,
-                    userId:e.userId
-                   })
-                  
-               }
-              })
 
-           res.status(200).send(skilldetails)} 
-        catch (err) {
-        res.status(500).send("not found");
-    }
+    //to display skill using id
+    router.post('/id_skill', async (req, res) => {
+        
+        try {
+            const skill = await Skill.findById({_id:req.body._id});
+            res.send(skill);
+        console.log(skill);
+        } catch (error) {
+            res.status(404).send({ error: 'Path not found' });
+        }
     });
+
+    //to get skill count
+    router.post('/totalcounts',async (req,res)=>{
+        try{
+            const skill=await Skill.find({});
+            const count=skill.length;
+            console.log(count);
+            res.status(200).send({"Total Skills":count})
+        }
+        
+        catch (error) {
+            res.status(500).send({ error: 'bit not found' });
+        }
+    });
+    // skill id count
+    router.post('/count',async (req,res)=>{
+        try{
+            const skill=await Skill.find({_id:req.body._id});
+            const count=skill.length;
+            const skilldetails= skill.map((e)=>{
+                return{
+                       _id:e._id,
+                       Title:e.Title,
+                       Description:e.Description
+                }
+
+            })
+            
+            console.log(count);
+            res.status(200).send({"skills":skilldetails,"Total Skill Bits":count})
+        }
+        
+        catch (error) {
+            res.status(500).send({ error: 'skill not found' });
+        }
+    });
+    
+
     
 module.exports = router;

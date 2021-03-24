@@ -1,13 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
+require('dotenv').config()
 
-const users = require('./routers/user.js');
-const skill =require('./routers/skill');
-const bit =require('./routers/bit');
-//const bodyParser = require("body-parser");
+const users = require('./Routers/user.js');
+const skill =require('./Routers/skill');
+const bit =require('./Routers/bit');
+const admin= require('./Routers/admin');
+const post= require('./Routers/post.js');
 const db = "mongodb+srv://saikumar2912:saikumar@cluster0.6llhp.mongodb.net/Explore?retryWrites=true&w=majority"
 
-const port = 6000;
+const PORT=process.env.PORT || 6000;
 const app = express();
 
 
@@ -29,7 +31,9 @@ mongoose
 app.use('/users', users);
 app.use('/skill',skill);
 app.use('/bit',bit);
+app.use('/admin',admin)
+app.use('/post',post)
 
 
-app.listen(port, () =>
-    console.log('Server running on port ' + port));
+app.listen(PORT, () =>
+    console.log(`Server running on port ${PORT}`));

@@ -3,7 +3,7 @@ const express = require('express');
 const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
-const User=require('../Model/User');
+const Admin=require('../Model/Admin');
 router.post('/',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
@@ -11,25 +11,23 @@ router.post('/',(req, res) => {
                 error:err
             })
         }
-        const user=new User({
+        const admin=new Admin({
             name:req.body.name,
             age:req.body.age,
             email:req.body.email,
             phone:req.body.phone,
             password:hashedPass
         })
-        user.save()
-        .then(res.status(201).send(user))
+        admin.save()
+        .then(res.status(201).send(admin))
 
     })
 });
-
-
 router.post('/login',(req,res)=>{
     var username=req.body.username
     var password=req.body.password
 
-    User.findOne({email:username})
+    Admin.findOne({email:username})
     .then(user=>{
         if(user){
             bcrypt.compare(password,user.password,function(err,result){
@@ -56,5 +54,4 @@ router.post('/login',(req,res)=>{
         }
     })
 });
-
 module.exports = router;

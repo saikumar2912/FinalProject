@@ -10,9 +10,9 @@ const BitSchema = new Schema({
         type:String,
         required:true
     },
-    skillId:{
+    skill_id:{
         type:Schema.Types.ObjectId,
-        ref:'skill'
+        ref:'skills'
     }
     })
-    module.exports = Bit = mongoose.model('bit', BitSchema)
+    module.exports = Bit = mongoose.model('Bit', BitSchema)
