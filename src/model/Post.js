@@ -2,13 +2,25 @@ const mongoose= require('mongoose');
 const Schema =mongoose.Schema;
 
 const PostSchema = new Schema({
-    Description:{
+    content:{
+        type:String,
+        required:true
+    },
+    like:{
+        type:String,
+        required:true
+    },
+    dislike:{
+      type:String,
+      required:true
+    },
+    irrevelant_content:{
         type:String,
         required:true
     },
     user_id:{
         type:Schema.Types.ObjectId,
-        ref:'explore'
+        ref:'user'
     },
     skill_id:{
         type:Schema.Types.ObjectId,
@@ -19,4 +31,4 @@ const PostSchema = new Schema({
         ref:'bit'
     }
     })
-    module.exports = Bit = mongoose.model('Post', PostSchema)
+    module.exports = Post = mongoose.model('Post', PostSchema)

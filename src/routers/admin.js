@@ -4,6 +4,8 @@ const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const Admin=require('../Model/Admin');
+
+// ADDMIN REGISTER
 router.post('/',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
@@ -23,6 +25,8 @@ router.post('/',(req, res) => {
 
     })
 });
+
+// ADMIN LOGIN
 router.post('/login',(req,res)=>{
     var username=req.body.username
     var password=req.body.password

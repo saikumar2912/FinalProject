@@ -52,28 +52,38 @@ const Bit =require('../Model/Bit')
             res.status(500).send({ error: 'bit not found' });
         }
     });
-    // skill id count
+    // skill id to count to bits presented
     router.post('/count',async (req,res)=>{
         try{
-            const skill=await Skill.find({_id:req.body._id});
+            const skill=await Bit.find({skill_id:req.body.skill_id});
             const count=skill.length;
-            const skilldetails= skill.map((e)=>{
-                return{
-                       _id:e._id,
-                       Title:e.Title,
-                       Description:e.Description
-                }
-
-            })
             
             console.log(count);
-            res.status(200).send({"skills":skilldetails,"Total Skill Bits":count})
+            res.status(200).send({"Total Skill Bits":count})
         }
         
         catch (error) {
             res.status(500).send({ error: 'skill not found' });
         }
     });
+    router.post('/newuser',async (req,res)=>{
+        try{
+            const user=await Skill.find({user_id:req.body.user_id});
+            const userdetails= user.map((e)=>{
+                return{
+                       user_id:e._id,
+                       title:e.Title,
+                       Description:e.Description
+                }
+            })
+            res.status(200).send({"user":userdetails})
+        }
+        catch (error) {
+            res.status(500).send({ error: 'user not found' });
+        }
+    });
+
+   
     
 
     

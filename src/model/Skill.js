@@ -9,7 +9,16 @@ const SkillSchema =new Schema({
     Description:{
         type:String,
         required:true
+    },
+    user_id:{
+        type:Schema.Types.ObjectId,
+        ref:"users"
+    },
+    admin_id:{
+        type:Schema.Types.ObjectId,
+        ref:"admins"
     }
+
 
 });
 module.exports = Skill = mongoose.model('Skill', SkillSchema)

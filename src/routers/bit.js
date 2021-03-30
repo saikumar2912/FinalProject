@@ -14,7 +14,7 @@ const Skill=require('../Model/Skill')
 		res.status(500).send(newbit);
 	}
 });
-// TO GET BIT DETAILS
+// TO GET BIT DETAILS AND SKILL DETAILS
 router.post('/getbit',async (req,res) =>{
 	try{
 		const skill=await Skill.find({_id:req.body._id})
@@ -27,7 +27,7 @@ router.post('/getbit',async (req,res) =>{
 			}
 		})
 
-	   const bit=await Bit.find()
+	   const bit=await Bit.find({skill_id:req.body._id})
 	   const bitdetails=bit.map((e)=>{
 		return{
 			bit_id:e._id,
@@ -58,11 +58,11 @@ router.post('/getbit',async (req,res) =>{
 //to get bit using id
 router.post('/id_bit',async(req,res)=>{
 	try{
-		const newbit=await Bit.findById({_id:req.body.id});
+		const newbit=await Bit.findById({skill_id:req.body.skill_id});
 		res.status(200).send(newbit);
 	}
 	catch(error){
-		res.status(404).send({error:'Invalid Bit ID'})
+		res.status(404).send({error:'Invalid skill ID'})
 
 	}
 });
