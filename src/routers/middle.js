@@ -19,11 +19,19 @@ try {
    
   router.post('/getskill',async (req,res)=>{
 	try{
-		const user=await User.findOne({_id:req.body._id})
+		const user=await Skill.find({user_id:req.body.user_id})
+		console.log(user);
+		const skill=user.map((e)=>{
+			return{
+				Title:e.Title
+			}
+		})
+		res.send(skill)
 		
+
 	}
 	catch (error) {
-		res.status(500)
+		res.status(500).send({error:'error message'})
 	}
 });
 

@@ -1,10 +1,18 @@
 const express = require('express');
+const cors=require('cors');
 
 const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const User=require('../Model/User');
-router.post('/',(req, res) => {
+const bodyParser=require('body-parser');
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.json(strict=true))
+
+
+outer.post('/',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
             require.json({
@@ -23,6 +31,8 @@ router.post('/',(req, res) => {
 
     })
 });
+
+
 
 
 router.post('/login',(req,res)=>{

@@ -32,7 +32,7 @@ router.post('/user',async (req,res)=>{
 			}
 		})
 		if(user){
-
+             res.send(user)
 		}
 		res.status(200).send({"user":userdetails})
 	}

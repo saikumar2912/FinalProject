@@ -66,6 +66,8 @@ const Bit =require('../Model/Bit')
             res.status(500).send({ error: 'skill not found' });
         }
     });
+
+
     router.post('/newuser',async (req,res)=>{
         try{
             const user=await Skill.find({user_id:req.body.user_id});
@@ -82,8 +84,26 @@ const Bit =require('../Model/Bit')
             res.status(500).send({ error: 'user not found' });
         }
     });
-
    
+    router.post('/getskill',async (req,res)=>{
+        try{
+            const user=await User.find({_id:req.body._id})
+            console.log(user);
+            const skill=skill.map((e)=>{
+                return{
+                    Title:e.Title
+                }
+            })
+            res.send(skill)
+            
+    
+        }
+        catch (error) {
+            res.status(500).send({error:'error message'})
+        }
+    });
+    
+
     
 
     

@@ -11,34 +11,34 @@ const Post= require('../Model/Post');
 	} catch (err) {
 		res.status(500).send("not found");
 	}
-});
+});0
 
 //TO UPDATE A POST  
 
-router.patch('/updatepost', async (req, res) => {
+router.patch('/updatepost/:id', async (req, res) => {
 	const updates = Object.keys(req.body);
-	console.log(updates);
+	//console.log(updates);
 	const allowedUpdates = ['content','like','dislike'];
-	
 	 const isValidOperation = updates.every((update) => {
 		return allowedUpdates.includes(update);
 	});
-	console.log(isValidOperation);
+	//console.log(allowedUpdates);
 	if (!isValidOperation) {
 		return res.status(400).send({ error: 'Invalid Operation' });
 	}
 
 	try {
-		const post = await Post.findById(req.params.id)
-		//console.log(post);
-		 if(!post){
-			 return res.status(404).send({error:'post not found'})
-		 }
+		 const post = await Post.findById(req.params.id)
+	//	console.log(post);
+		if(!post){
+			res.status(500).send("not a user")
+		}
 		updates.forEach((update)=>{
 			post[update]=req.body[update]
 		});
-		await post.save();
-		res.send(post)
+		await post.save()
+		console.log(post);
+		res.json(post)
 	} catch (err) {
 		res.status(500).send({ error: err.message});
 	}
@@ -51,6 +51,35 @@ router.post('/getpost',async(req,res)=>{
 	{
 		res.status(500).send("not found")
 	}
-})
+});
+
+router.post('/id_post',async(req,res)=>{
+	try{
+		const newpost=await Post.find({user_id:req.body.user_id});
+		const count=newpost.length
+		console.log(count);
+		res.status(200).send({'total posts':count});
+	}
+	catch(error){
+		res.status(404).send({error:'Invalid user ID'})
+
+	}
+});
+//to get total post count
+router.post('/post/count',async (req,res)=>{
+	try{
+		const post=await Post.find({});
+		const count=post.length;
+		console.log(count);
+		res.status(200).send({"Total Post":count})
+	}
+	
+	catch (error) {
+		res.status(500).send({ error: 'bit not found' });
+	}
+});
+
+
+
 
 module.exports = router;
