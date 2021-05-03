@@ -14,18 +14,20 @@ const Skill=require('../Model/Skill')
 		res.status(500).send(newbit);
 	}
 });
+router.post('/allbits', async (req, res) => {
+        
+	try {
+		const bit = await Bit.find({});
+		res.send(bit);
+	} catch (error) {
+		res.status(404).send({ error: 'Path not found' });
+	}
+});
+
 // TO GET BIT DETAILS AND SKILL DETAILS
 router.post('/getbit',async (req,res) =>{
 	try{
-		const skill=await Skill.find({_id:req.body._id})
-		const skilldetails= skill.map((e)=>{
-			return{
-				   skill_id:e._id,
-				   Title:e.Title,
-				   Description:e.Description,
-				   bit:[]
-			}
-		})
+
 
 	   const bit=await Bit.find({skill_id:req.body._id})
 	   const bitdetails=bit.map((e)=>{
@@ -33,21 +35,19 @@ router.post('/getbit',async (req,res) =>{
 			bit_id:e._id,
 			Title:e.title,
 			Description:e.Description,
-			content:[]
+			
 	 }
-	   })
+	   }
+	   )
 	  //console.log(bitdetails)
-	  skilldetails.map((s)=>{
-		  console.log(s)
-		  bitdetails.map((c)=>{
-			console.log(c)
-			  if(s._id === c.skill_id) {
-				  s.bit.push(c)
-			  }
-		  })
+	  bitdetails.map((c)=>{
+		console.log(c)
+		  if(skill._id === c.skill_id) {
+			  bit.push(c)
+		  }
 	  })
 	  //console.log(skilldetails);
-	  res.send(skilldetails)
+	  res.send(bitdetails)
 	   
 	}
 
@@ -86,12 +86,14 @@ router.post('/newskill',async (req,res)=>{
 		const bit=await Bit.find({skill_id:req.body.skill_id});
 		const bitdetails= bit.map((e)=>{
 			return{
+				skill_id:e.skill_id,
 				   bit_id:e._id,
 				   title:e.title,
 				   Description:e.Description
 			}
 		})
 		res.status(200).send({"bits":bitdetails})
+		console.log(bitdetails)
 	}
 	catch (error) {
 		res.status(500).send({ error: 'bit not found' });

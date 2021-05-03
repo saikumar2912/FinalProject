@@ -8,7 +8,7 @@ const BitSchema = new Schema({
     },
     Description:{
         type:String,
-        required:true
+        required:false
     },
     skill_id:{
         type:Schema.Types.ObjectId,

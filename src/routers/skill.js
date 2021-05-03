@@ -21,7 +21,6 @@ const Bit =require('../Model/Bit')
         try {
             const skill = await Skill.find({});
             res.send(skill);
-        console.log(skill);
         } catch (error) {
             res.status(404).send({ error: 'Path not found' });
         }
@@ -102,9 +101,34 @@ const Bit =require('../Model/Bit')
             res.status(500).send({error:'error message'})
         }
     });
-    
-
-    
-
+    router.post('/userskills',async (req,res)=>{
+        try{
+            const skill=await Skill.find({user_id:req.body.user_id});
+            const skilldetails= skill.map((e)=>{
+                return{
+                       user_id:e.user_id,
+                       skill_id:e._id,
+                       title:e.Title,
+                       Description:e.Description
+                }
+            })
+            res.status(200).send({"skills":skilldetails})
+            console.log(bitdetails)
+        }
+        catch (error) {
+            res.status(500).send({ error: 'bit not found' });
+        }
+    });
+    router.get('/allpost',(req,res)=>{
+        Skill.find()
+        .populate("user_id","_id user_name")
+        .then((skills)=>{
+            res.send({skills})
+        }).catch(err=>{
+            console.log(err)
+        })
+        
+    })
+  
     
 module.exports = router;
