@@ -1,15 +1,14 @@
 const mongoose= require('mongoose');
 const Schema =mongoose.Schema;
+const {ObjectId} = mongoose.Schema.Types
 
 const PostSchema = new Schema({
     content:{
         type:String,
         required:true
     },
-    like:{
-        type:Number,
-        default:0    
-},
+        likes:[{type:ObjectId,ref:"user"}],
+
     dislike:{
         type:Number,
         default:0 
@@ -24,7 +23,7 @@ const PostSchema = new Schema({
     },
     user_name:{
         type:String,
-        required:false
+        required:true
     },
     skill_id:{
         type:Schema.Types.ObjectId,
@@ -32,7 +31,7 @@ const PostSchema = new Schema({
     },
     skill_title:{
         type:String,
-        required:false
+        required:true
     },
     bit_id:{
         type:Schema.Types.ObjectId,
@@ -40,7 +39,7 @@ const PostSchema = new Schema({
     },
     bit_title:{
         type:String,
-        required:false
+        required:true
     },
     })
     module.exports = Post = mongoose.model('Post', PostSchema)

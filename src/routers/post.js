@@ -94,7 +94,7 @@ router.post('/post/count',async (req,res)=>{
 });
 router.post('/like', async (req, res) => {
     try {
-        const post = await Post.findById({_id:req.body._id});
+        const post = await Post.findById({_id:req.body._id,});
         if(!post) {
             return res.status(404).send({error: 'Post not found'});
         }
@@ -105,7 +105,19 @@ router.post('/like', async (req, res) => {
         res.status(500).status({error: 'Internal server error'});
     }
 });
-
+router.put('/like',(req,res)=>{
+    Post.findByIdAndUpdate(req.body.postId,{
+        $push:{likes:req.body._id}
+    },{
+        new:true
+    }).exec((err,result)=>{
+        if(err){
+            return res.status(422).json({error:err})
+        }else{
+            res.json(result)
+        }
+    })
+})
 
 
 

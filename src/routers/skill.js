@@ -5,15 +5,23 @@ const router =express.Router();
 const Skill=require('../Model/Skill')
 const Bit =require('../Model/Bit')
   //add a skill
-    router.post('/addskill', async (req, res) => {
-        //const newskill = new Skill(req.body);
-	try {
-		const skill1=await Skill.create(req.body);
-        res.send(skill1)
-	} catch (err) {
-		res.status(500).send();
-	}
-       });  
+  router.post('/addskill', async (req, res) => {
+try {
+    const newskill = new Skill(req.body);
+
+    await newskill.save()
+    .then((e)=>res.status(201).send({data:e}))
+} 
+catch (err) {
+    res.status(404).send({err:"invalid data"});
+}
+}); 
+// router.post('/adduser',async(req,res)=>{
+
+//     try{
+//         const adduse= new Skill.find({});
+//     }
+// })
 
     //to display all skills   
     router.post('/skills', async (req, res) => {
@@ -129,6 +137,63 @@ const Bit =require('../Model/Bit')
         })
         
     })
-  
+  //delete a skill
+    router.delete('/deleteskill/:id', async (req, res) => {
+        try {
+            const skill = await Skill.findOne(req.params._id);
+            if (!skill) {
+                return res.status(404).send({ error: 'skill not found' });
+            }
+            skill.remove()
+            res.send(skill);
+
+        } catch (error) {
+            res.status(500).send({ error: 'Internal server error' });
+        }
+    });
     
-module.exports = router;
+    // router.put('/follow',(req,res)=>{
+    //     console.log(req.body)
+    //     Skill.findByIdAndUpdate(req.body.skill_id,
+    //         console.log(req.body.followId),
+    //         {
+    //         $push:{followers:req.body.user_id}
+    //     },console.log(followers),{
+    //         new:true
+    //     },(err,result)=>{
+    //         if(err){
+    //             return res.status(422).json({error:err})
+    //         }
+    //       User.findByIdAndUpdate(req.body.user_id,{
+    //           $push:{following:req.body.skill_id}
+              
+    //       },{new:true}).then(result=>{
+    //           res.json(result)
+    //       }).catch(err=>{
+    //           return res.status(422).json({error:err})
+    //       })
+    
+    //     }
+    //     )
+    // })
+
+    router.put('/follow/:id',(req,res)=>{
+        console.log(req)
+        Skill.findByIdAndUpdate(req.params.id,
+
+            {
+            $push:{followers:req.body.user_id}
+        },{
+            new:true
+        }).exec((err,result)=>{
+            if(err){
+                return res.status(422).json({error:err})
+            }else{
+                res.json(result)
+                console.log(result)
+            }
+        })
+    })
+    
+    
+module.exports = router
