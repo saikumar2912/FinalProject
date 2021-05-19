@@ -16,11 +16,10 @@ const SkillSchema =new Schema({
         type:String,
         required:true
     },
-    user_id:{
-        type:Schema.Types.ObjectId,
-        ref:'user'
-    },
-    followers:[{type:ObjectId,ref:"user"}],
+    followers:[{
+        type:ObjectId,
+            ref:"user"
+    }]
 
 });
-module.exports = Skill = mongoose.model('Skill', SkillSchema)
+module.exports = Skill = mongoose.model('skill', SkillSchema)

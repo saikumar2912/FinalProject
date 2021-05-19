@@ -4,7 +4,8 @@ const router =express.Router();
 const bcrypt =require('bcryptjs');
 const jwt =require('jsonwebtoken');
 const User=require('../Model/User');
-
+const { CreateToken } = require('../Middleware/Token');
+const { checkPermission } = require('../Middleware/permission');
 router.post('/adduser',(req, res) => {
     bcrypt.hash(req.body.password,10,function(err,hashedPass){
         if(err){
@@ -17,9 +18,10 @@ router.post('/adduser',(req, res) => {
             email_id:req.body.email_id,
             phoneNo:req.body.phoneNo,
             password:hashedPass,
+            role:req.body.role
         })
         user.save()
-        .then(res.status(201).send(user))
+        .then(res.status(201).send({message:"registered successfully"}))
 
     })
 });
@@ -40,61 +42,43 @@ router.post('/login',(req,res)=>{
                     })
                 }
                 if(result){
-                    let token =jwt.sign({user_name:user.user_name},'verySecret',{expiresIn:'1h'})
+                    let token = CreateToken(user)
+                    console.log(token)
                     res.send({message:"login sucessful",
-                             _id:user._id,
-                             user_name:user.user_name,
-                             email_id:user.email_id,});
+                            token});
                     token
                 }else{
                     res.json({
-                        message:'password does not match'
+                        message:'please enter the correct password'
                     })
                 }
             })
 
         }else{
             res.json({
-                message:"no user found"
+                message:"Not a valid user"
             })
         }
     })
 });
 
 
-// const JWT = require("jsonwebtoken");
-// const User = require("../models/User.model");
-// const Token = require("../models/Token.model");
-// const sendEmail = require("../utils/email/sendEmail");
-// const crypto = require("crypto");
-// const bcrypt = require("bcrypt");
+router.post('/particularUser',checkPermission(), async (req, res) => {
+	try {
+	  const user = await User.findOne({_id:req.user_id});
+	if(!user){
+		res.status(404).send({error:"user not found"});
+	}
+
+		res.status(200).send(user).catch((e)=>console.log(e))
+	 }
+	
+		
+		 catch (err) {
+			res.status(500).send({error:err.message});
+		}
+});
 
 
-// router.post('invaliduser');
-// const signup = async (data) => {
-//   let user = await User.findOne({ email: data.email });
-//   if (user) {
-//     throw new Error("Email already exist");
-//   }
-//   user = new User(data);
-//   const token = JWT.sign({ id: user._id }, JWTSecret);
-//   await user.save();
-//   return (data = {
-//     userId: user._id,
-//     email: user.email,
-//     name: user.name,
-//     token: token,
-//   });
-// };
-
-// const user = await User.findOne({ email });
-
-//   if (!user) {
-//       throw new Error("User does not exist");
-//   }
-//   let token = await Token.findOne({ userId: user._id });
-//   if (token) { 
-//         await token.deleteOne()
-//   };
 
 module.exports = router;

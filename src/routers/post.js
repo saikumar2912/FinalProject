@@ -49,22 +49,35 @@ router.patch('/updatepost', async (req, res) => {
 
 router.post('/getpost',async(req,res)=>{
 	try{
-		const post=await Post.find()
+		const post=await Post.find().populate("bit_id user_id skill_id").sort({createdAt: 'asc'})
 		res.send(post)
 	}catch(error)
 	{
 		res.status(500).send("not found")
 	}
 });
-router.post('/getpost/user_id',async(req,res)=>{
-	try{
-		const post=await Post.find({user_id:req.body.user_id})
-		res.send(post)
-	}catch(error)
-	{
-		res.status(500).send("not found")
-	}
-});
+
+router.get('/allposts',(req,res)=>{
+	Post.find().populate("user_id skill_id bit_id","title Title user_name")
+	.then((data)=>{
+		res.status(201).send(data)
+	}).catch(err=>{
+		console.log(err)
+		res.status(404).send({message:"not a user"})
+	})
+	
+})
+router.get('/userposts',(req,res)=>{
+	Post.find({skill_id:req.body.skill_id}).populate("skill_id bit_id","title Title followers user_name")
+	.then((data)=>{
+		res.status(201).send(data)
+	}).catch(err=>{
+		console.log(err)
+		res.status(404).send({message:"not a user"})
+	})
+	
+})
+//user posts
 
 router.post('/id_post',async(req,res)=>{
 	try{
@@ -92,34 +105,73 @@ router.post('/post/count',async (req,res)=>{
 		res.status(500).send({ error: 'bit not found' });
 	}
 });
-router.post('/like', async (req, res) => {
-    try {
-        const post = await Post.findById({_id:req.body._id,});
-        if(!post) {
-            return res.status(404).send({error: 'Post not found'});
-        }
-        post.like += 1;
-        await post.save();
-        res.send(post);
-    } catch (error) {
-        res.status(500).status({error: 'Internal server error'});
-    }
-});
-router.put('/like',(req,res)=>{
-    Post.findByIdAndUpdate(req.body.postId,{
-        $push:{likes:req.body._id}
-    },{
-        new:true
-    }).exec((err,result)=>{
-        if(err){
-            return res.status(422).json({error:err})
-        }else{
-            res.json(result)
-        }
-    })
+router.post('/like',async(req,res)=>{
+	console.log(req.body)
+	const post = await Post.findOne({ _id:req.body._id});
+	const user = req.body.user_id
+	const like = post.like.includes(user)
+	const dislike = post.dislike.includes(user)
+console.log(like);
+if (like === true) {
+	post.like.remove(user)
+}
+else if(dislike === true){
+	post.dislike.remove(user)
+	post.like.push(user)
+}
+else{
+	post.like.push(user)
+}
+try {
+	await post.save();
+	res.status(201).send(post);
+} catch (err) {
+	res.status(500).send({err:err.message});
+}
 })
 
+router.post('/dislike',async(req,res)=>{
+	
+const post = await Post.findOne({ _id:req.body._id});
+	const user = req.body.user_id
+	const like = post.like.includes(user)
+	const dislike = post.dislike.includes(user)
+console.log(like);
+if (like === true) {
+	post.like.remove(user)
+	post.dislike.push(user)
+}
+else if(dislike === true){
+	post.dislike.remove(user)
+}
+else{
+	post.dislike.push(user)
+}
+try {
+	await post.save();
+	res.status(201).send(post);
+} catch (err) {
+	res.status(500).send();
+}
+})
 
+router.post('/irrevelant',async(req,res)=>{
+	const post = await Post.findOne({ _id:req.body._id});
+	const user = req.body.user_id
+	console.log(user)
+	const irrevelant = post.irrevelant_content.includes(user)
+if (irrevelant === true) {
+	post.irrevelant_content.remove(user)
+}
+else{
+	post.irrevelant_content.push(user)
+}
+try {
+	await post.save();
+	res.status(201).send(post);
+} catch (err) {
+	res.status(500).send("invalid skill")
+}})
 
 
 module.exports = router;

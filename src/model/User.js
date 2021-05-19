@@ -19,7 +19,10 @@ const UserSchema= new Schema({
         type:String,
         required:true
     },
-    following:[{type:ObjectId,ref:"skill"}],
+    role:{
+        type:String,
+        default:"user"
+    },
 
 
 });

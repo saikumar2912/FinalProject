@@ -7,39 +7,31 @@ const PostSchema = new Schema({
         type:String,
         required:true
     },
-        likes:[{type:ObjectId,ref:"user"}],
-
-    dislike:{
-        type:Number,
-        default:0 
-    },
-    irrevelant_content:{
-        type:Number,
-        default:0 
-    },
+like:[{
+    type:ObjectId,
+    ref:"user"
+}],
+    dislike:[{
+        type:ObjectId,
+    ref:"user"
+    }],
+    irrevelant_content:[{
+        type:ObjectId,
+    ref:"user"
+    }],
     user_id:{
         type:Schema.Types.ObjectId,
         ref:'user'
-    },
-    user_name:{
-        type:String,
-        required:true
     },
     skill_id:{
         type:Schema.Types.ObjectId,
         ref:'skill'
     },
-    skill_title:{
-        type:String,
-        required:true
-    },
+    
     bit_id:{
         type:Schema.Types.ObjectId,
         ref:'bit'
     },
-    bit_title:{
-        type:String,
-        required:true
-    },
+    
     })
     module.exports = Post = mongoose.model('Post', PostSchema)

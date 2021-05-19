@@ -1,10 +1,13 @@
 const express = require('express');
-
+const {checkPermission}=require('../Middleware/permission')
 const router =express.Router();
 
+const User =require('../Model/User')
 const Skill=require('../Model/Skill')
 const Bit =require('../Model/Bit')
   //add a skill
+ 
+ 
   router.post('/addskill', async (req, res) => {
 try {
     const newskill = new Skill(req.body);
@@ -94,9 +97,9 @@ catch (err) {
    
     router.post('/getskill',async (req,res)=>{
         try{
-            const user=await User.find({_id:req.body._id})
+            const user=await Skill.find({followers:req.body.user_id})
             console.log(user);
-            const skill=skill.map((e)=>{
+            const skill=user.map((e)=>{
                 return{
                     Title:e.Title
                 }
@@ -111,7 +114,7 @@ catch (err) {
     });
     router.post('/userskills',async (req,res)=>{
         try{
-            const skill=await Skill.find({user_id:req.body.user_id});
+            const skill=await Skill.find({followers:req.body.user_id});
             const skilldetails= skill.map((e)=>{
                 return{
                        user_id:e.user_id,
@@ -121,22 +124,35 @@ catch (err) {
                 }
             })
             res.status(200).send({"skills":skilldetails})
-            console.log(bitdetails)
+            console.log(skill)
         }
         catch (error) {
-            res.status(500).send({ error: 'bit not found' });
+            res.status(500).send({ error: 'skill not found' });
         }
     });
-    router.get('/allpost',(req,res)=>{
+
+    router.get('/allusers',(req,res)=>{
         Skill.find()
-        .populate("user_id","_id user_name")
+        .populate("followers","_id user_name")
         .then((skills)=>{
-            res.send({skills})
+            res.send(skills)
         }).catch(err=>{
             console.log(err)
         })
         
     })
+    router.get('/userskills',(req,res)=>{
+        Skill.find({followers:req.body._id})
+        .populate("followers")
+        .then((skills)=>{
+            res.send(skills.followers)
+        }).catch(err=>{
+            console.log(err)
+            res.status(404).send({message:"not followed any skill"})
+        })
+        
+    })
+    
   //delete a skill
     router.delete('/deleteskill/:id', async (req, res) => {
         try {
@@ -151,21 +167,19 @@ catch (err) {
             res.status(500).send({ error: 'Internal server error' });
         }
     });
-    
-    // router.put('/follow',(req,res)=>{
+
+    // router.put('/follow',checkPermission(),(req,res)=>{
     //     console.log(req.body)
-    //     Skill.findByIdAndUpdate(req.body.skill_id,
-    //         console.log(req.body.followId),
-    //         {
+    //     Skill.findByIdAndUpdate(req.body.skillid,{
     //         $push:{followers:req.body.user_id}
-    //     },console.log(followers),{
+    //     },{
     //         new:true
     //     },(err,result)=>{
     //         if(err){
     //             return res.status(422).json({error:err})
     //         }
     //       User.findByIdAndUpdate(req.body.user_id,{
-    //           $push:{following:req.body.skill_id}
+    //           $push:{following:req.body.skillid}
               
     //       },{new:true}).then(result=>{
     //           res.json(result)
@@ -176,24 +190,70 @@ catch (err) {
     //     }
     //     )
     // })
-
-    router.put('/follow/:id',(req,res)=>{
-        console.log(req)
-        Skill.findByIdAndUpdate(req.params.id,
-
-            {
-            $push:{followers:req.body.user_id}
-        },{
-            new:true
-        }).exec((err,result)=>{
-            if(err){
-                return res.status(422).json({error:err})
-            }else{
-                res.json(result)
-                console.log(result)
-            }
-        })
-    })
+    // router.put('/unfollow',checkPermission(),(req,res)=>{
+    //     console.log(req.body)
+    //     User.findByIdAndUpdate(req.body.skillid,{
+    //         $pull:{followers:req.body.user_id}
+    //     },{
+    //         new:true
+    //     },(err,result)=>{
+    //         if(err){
+    //             return res.status(422).json({error:err})
+    //         }
+    //       Skill.findByIdAndUpdate(req.body.user_id,{
+    //           $pull:{following:req.body.skillid}
+              
+    //       },{new:true}).then(result=>{
+    //           res.json(result)
+    //       }).catch(err=>{
+    //           return res.status(422).json({error:err})
+    //       })
+    
+    //     }
+    //     )
+    // })
     
     
+    
+    router.post('/follow',async(req,res)=>{
+		const skill = await Skill.findOne({ _id:req.body._id});
+        console.log(skill)
+		const user = req.body.user_id
+        console.log(user)
+	    const follow = skill.followers.includes(user)
+	console.log(follow);
+	if (follow === true) {
+		skill.followers.remove(user)
+    }
+	else{
+		skill.followers.push(user)
+	}
+	try {
+		await skill.save();
+		res.status(201).send(skill);
+	} catch (err) {
+		res.status(500).send("invalid skill")
+    }})
+    
+    router.post('/unfollow',checkPermission(),async(req,res)=>{
+		const skill = await Skill.findOne({ _id:req.body._id});
+        console.log(skill)
+		const user = req.body.user_id
+        console.log(user)
+	    const unfollow = skill.followers.includes(user)
+	console.log(unfollow);
+	if (unfollow === true) {
+		skill.followers.remove(user)
+    }
+	else{
+		skill.followers.pull(user)
+	}
+	try {
+		await skill.save();
+		res.status(201).send(skill);
+	} catch (err) {
+		res.status(500).send("invalid skill")
+    }})
+    
+
 module.exports = router
