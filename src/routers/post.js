@@ -49,7 +49,7 @@ router.patch('/updatepost', async (req, res) => {
 
 router.post('/getpost',async(req,res)=>{
 	try{
-		const post=await Post.find().populate("bit_id user_id skill_id").sort({createdAt: 'asc'})
+		const post=await Post.find().populate("bit_id user_id skill_id")
 		res.send(post)
 	}catch(error)
 	{

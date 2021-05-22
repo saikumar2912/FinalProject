@@ -156,7 +156,7 @@ catch (err) {
   //delete a skill
     router.delete('/deleteskill/:id', async (req, res) => {
         try {
-            const skill = await Skill.findOne(req.params._id);
+            const skill = await Skill.findById(req.params.id);
             if (!skill) {
                 return res.status(404).send({ error: 'skill not found' });
             }
@@ -167,53 +167,6 @@ catch (err) {
             res.status(500).send({ error: 'Internal server error' });
         }
     });
-
-    // router.put('/follow',checkPermission(),(req,res)=>{
-    //     console.log(req.body)
-    //     Skill.findByIdAndUpdate(req.body.skillid,{
-    //         $push:{followers:req.body.user_id}
-    //     },{
-    //         new:true
-    //     },(err,result)=>{
-    //         if(err){
-    //             return res.status(422).json({error:err})
-    //         }
-    //       User.findByIdAndUpdate(req.body.user_id,{
-    //           $push:{following:req.body.skillid}
-              
-    //       },{new:true}).then(result=>{
-    //           res.json(result)
-    //       }).catch(err=>{
-    //           return res.status(422).json({error:err})
-    //       })
-    
-    //     }
-    //     )
-    // })
-    // router.put('/unfollow',checkPermission(),(req,res)=>{
-    //     console.log(req.body)
-    //     User.findByIdAndUpdate(req.body.skillid,{
-    //         $pull:{followers:req.body.user_id}
-    //     },{
-    //         new:true
-    //     },(err,result)=>{
-    //         if(err){
-    //             return res.status(422).json({error:err})
-    //         }
-    //       Skill.findByIdAndUpdate(req.body.user_id,{
-    //           $pull:{following:req.body.skillid}
-              
-    //       },{new:true}).then(result=>{
-    //           res.json(result)
-    //       }).catch(err=>{
-    //           return res.status(422).json({error:err})
-    //       })
-    
-    //     }
-    //     )
-    // })
-    
-    
     
     router.post('/follow',async(req,res)=>{
 		const skill = await Skill.findOne({ _id:req.body._id});
