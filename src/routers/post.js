@@ -79,12 +79,11 @@ router.get('/userposts',(req,res)=>{
 })
 //user posts
 
-router.post('/id_post',async(req,res)=>{
+router.post('/user_idposts',async(req,res)=>{
 	try{
-		const newpost=await Post.find({user_id:req.body.user_id});
-		const count=newpost.length
-		console.log(count);
-		res.status(200).send({'total posts':count});
+		const newpost=await Post.find({user_id:req.body.user_id}).populate("skill_id bit_id");
+		console.log(newpost);
+		res.status(200).send(newpost);
 	}
 	catch(error){
 		res.status(404).send({error:'Invalid user ID'})
@@ -172,6 +171,21 @@ try {
 } catch (err) {
 	res.status(500).send("invalid skill")
 }})
+
+router.delete('/deletepost/:id', async (req, res) => {
+	try {
+		const post = await Post.findById(req.params.id);
+		if (!post) {
+			return res.status(404).send({ error: 'post not found' });
+		}
+		post.remove()
+		res.send(post);
+
+	} catch (error) {
+		res.status(500).send({ error: 'Internal server error' });
+	}
+});
+
 
 
 module.exports = router;

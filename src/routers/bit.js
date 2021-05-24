@@ -92,4 +92,19 @@ router.post('/newskill',async (req,res)=>{
 	}
 });
 
+router.delete('/delete_bit/:id', async (req, res) => {
+	try {
+		const bit = await Bit.findById(req.params.id);
+		if (!bit) {
+			return res.status(404).send({ error: 'bit not found' });
+		}
+		bit.remove()
+		res.send(bit);
+
+	} catch (error) {
+		res.status(500).send({ error: 'Internal server error' });
+	}
+});
+
+
 module.exports = router;
