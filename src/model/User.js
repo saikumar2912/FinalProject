@@ -23,7 +23,22 @@ const UserSchema= new Schema({
         type:String,
         default:"user"
     },
+    profile_picture:{
+        type:String,
+        required:false,
+        default:""
+    },
+    Education:{
+        type:String,
+        required:false,
+        default:"Not Mentioned"
+    },
+    Bio:{
+        type:String,
+        required:false,
+        default:"Not Mentioned"
+    },
 
 
-});
+},{timestamps:true});
 module.exports = User = mongoose.model('user', UserSchema)

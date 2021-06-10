@@ -21,5 +21,5 @@ const SkillSchema =new Schema({
             ref:"user"
     }]
 
-});
+},{timestamps:true});
 module.exports = Skill = mongoose.model('skill', SkillSchema)

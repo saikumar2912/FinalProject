@@ -9,16 +9,20 @@ const PostSchema = new Schema({
     },
 like:[{
     type:ObjectId,
-    ref:"user"
-}],
+    ref:"user",
+
+}
+],
     dislike:[{
         type:ObjectId,
     ref:"user"
     }],
-    irrevelant_content:[{
-        type:ObjectId,
-    ref:"user"
-    }],
+
+  popularity:{
+    type:Number,
+    default:0   
+  },
+   
     user_id:{
         type:Schema.Types.ObjectId,
         ref:'user'
@@ -33,5 +37,14 @@ like:[{
         ref:'bit'
     },
     
-    })
-    module.exports = Post = mongoose.model('Post', PostSchema)
+    },{timestamps:true});
+
+    PostSchema.pre('save', function (next) {
+       
+        this.popularity=this.like.length*(+1)+this.dislike.length*(-2)
+
+        next();
+      })
+
+
+    module.exports = Post = mongoose.model('post', PostSchema)

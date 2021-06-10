@@ -1,13 +1,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const verificationSchema = new Schema({
+const {ObjectId} = mongoose.Schema.Types
+
+const VerificationSchema = new Schema({
     admin_id:{
         type: Schema.Types.ObjectId,
-        ref: 'admins'
+        ref: 'user'
 },
  user_id:{
         type: Schema.Types.ObjectId,
-        ref: 'users'
+        required:true,
+        ref: 'user'
+    },
+    status:{
+        type:String,
+        required:true,
+        default:"notVerified"
     }
-});
-module.exports = Verification = mongoose.model('verification',verificationSchema)
+},{timestamps:true});
+module.exports = Verification = mongoose.model('verification',VerificationSchema)

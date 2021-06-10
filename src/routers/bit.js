@@ -16,7 +16,7 @@ const {checkPermission}=require('../Middleware/permission')
 		res.status(500).send(newbit);
 	}
 });
-router.post('/allbits', async (req, res) => {
+router.post('/allbits',checkPermission(), async (req, res) => {
         
 	try {
 		const bit = await Bit.find({});
@@ -29,7 +29,7 @@ router.post('/allbits', async (req, res) => {
 
 
 //to get bit details using skillid
-router.get('/allbits',(req,res)=>{
+router.get('/allbits',checkPermission(),(req,res)=>{
 	Bit.find().populate("skill_id")
 	.then((bits)=>{
 		res.send({bits})
@@ -38,7 +38,7 @@ router.get('/allbits',(req,res)=>{
 	})
 	
 })
-router.get('/bits/skillid',(req,res)=>{
+router.get('/bits/skillid',checkPermission(),(req,res)=>{
 	Bit.find({skill_id:req.body.skill_id}).populate("skill_id")
 	.then((bits)=>{
 		res.send({bits})
@@ -48,7 +48,7 @@ router.get('/bits/skillid',(req,res)=>{
 	
 })
 //to get bit using id
-router.post('/id_bit',async(req,res)=>{
+router.post('/id_bit',checkPermission(),async(req,res)=>{
 	try{
 		const newbit=await Bit.findById({skill_id:req.body.skill_id});
 		res.status(200).send(newbit);
@@ -59,7 +59,7 @@ router.post('/id_bit',async(req,res)=>{
 	}
 });
 //to get total bits count
-router.post('/count',async (req,res)=>{
+router.post('/count',checkPermission(),async (req,res)=>{
 	try{
 		const bit=await Bit.find({});
 		const count=bit.length;
@@ -73,7 +73,7 @@ router.post('/count',async (req,res)=>{
 });
 
 //skill id to get bit details
-router.post('/newskill',async (req,res)=>{
+router.post('/newskill',checkPermission(),async (req,res)=>{
 	try{
 		const bit=await Bit.find({skill_id:req.body.skill_id});
 		const bitdetails= bit.map((e)=>{
@@ -105,6 +105,35 @@ router.delete('/delete_bit/:id', async (req, res) => {
 		res.status(500).send({ error: 'Internal server error' });
 	}
 });
+router.patch('/updatebit/:id', async (req, res) => {
+	
+    const updates = Object.keys(req.body);
+    console.log(updates);
+    const allowedUpdates = ['title'];
+    const isValidOperation = updates.every((update) => {
+        return allowedUpdates.includes(update);
+    });
 
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid Operation' });
+    }
+
+    try {
+        const bit = await Bit.findById(req.params.id)
+        console.log(bit);
+        if (!bit) {
+           
+            return res.status(404).send({ error: 'bit not found' });
+        }
+        updates.forEach((update) => {
+            bit[update] = req.body[update];
+        });
+        await bit.save();
+        res.send(bit);
+    } catch (err) {
+        res.status(500).send({error: err.message});
+    }
+
+});
 
 module.exports = router;

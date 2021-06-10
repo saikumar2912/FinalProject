@@ -5,13 +5,15 @@ const cors=require('cors');
 const users = require('./Routers/user.js');
 const skill = require('./Routers/skill');
 const bit = require('./Routers/bit');
-const admin = require('./Routers/admin');
 const post = require('./Routers/post.js');
-const middle= require('./Routers/middle');
+const achive=require('./Routers/achivement')
+const report=require('./Routers/report')
 const verify=require('./Routers/verification')
+
 require('dotenv').config();
 let port = process.env.PORT;
 let db=process.env.DB;
+
 const app = express();
 
 app.use(express.json());
@@ -33,10 +35,10 @@ mongoose
 app.use('/users', users);
 app.use('/skill',skill);
 app.use('/bit',bit);
-app.use('/admin',admin);
 app.use('/post',post);
-app.use('/middle',middle);
-app.use('/verify',verify);
+app.use('/achivement',achive);
+app.use('/report',report)
+app.use('/verify',verify)
 
 app.listen(port, () =>
     console.log(`Server running on port ${port}`));

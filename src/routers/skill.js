@@ -8,7 +8,7 @@ const Bit =require('../Model/Bit')
   //add a skill
  
  
-  router.post('/addskill', async (req, res) => {
+  router.post('/addskill',checkPermission(), async (req, res) => {
 try {
     const newskill = new Skill(req.body);
 
@@ -27,7 +27,7 @@ catch (err) {
 // })
 
     //to display all skills   
-    router.post('/skills', async (req, res) => {
+    router.post('/skills',checkPermission(), async (req, res) => {
         
         try {
             const skill = await Skill.find({});
@@ -38,7 +38,7 @@ catch (err) {
     });
 
     //to display skill using id
-    router.post('/id_skill', async (req, res) => {
+    router.post('/id_skill',checkPermission(), async (req, res) => {
         
         try {
             const skill = await Skill.findById({_id:req.body._id});
@@ -50,7 +50,7 @@ catch (err) {
     });
 
     //to get skill count
-    router.post('/totalcounts',async (req,res)=>{
+    router.post('/totalcounts',checkPermission(), async (req,res)=>{
         try{
             const skill=await Skill.find({});
             const count=skill.length;
@@ -63,7 +63,7 @@ catch (err) {
         }
     });
     // skill id to count to bits presented
-    router.post('/count',async (req,res)=>{
+    router.post('/count',checkPermission(),async (req,res)=>{
         try{
             const skill=await Bit.find({skill_id:req.body.skill_id});
             const count=skill.length;
@@ -78,7 +78,7 @@ catch (err) {
     });
 
 
-    router.post('/newuser',async (req,res)=>{
+    router.post('/newuser',checkPermission(),async (req,res)=>{
         try{
             const user=await Skill.find({user_id:req.body.user_id});
             const userdetails= user.map((e)=>{
@@ -95,7 +95,7 @@ catch (err) {
         }
     });
    
-    router.post('/getskill',async (req,res)=>{
+    router.post('/getskill',checkPermission(),async (req,res)=>{
         try{
             const user=await Skill.find({followers:req.body.user_id})
             console.log(user);
@@ -112,7 +112,7 @@ catch (err) {
             res.status(500).send({error:'error message'})
         }
     });
-    router.post('/userskills',async (req,res)=>{
+    router.post('/userskills',checkPermission(),async (req,res)=>{
         try{
             const skill=await Skill.find({followers:req.body.user_id});
             const skilldetails= skill.map((e)=>{
@@ -120,7 +120,8 @@ catch (err) {
                        user_id:e.user_id,
                        skill_id:e._id,
                        title:e.Title,
-                       Description:e.Description
+                       Description:e.Description,
+                       photo:e.photo
                 }
             })
             res.status(200).send({"skills":skilldetails})
@@ -131,7 +132,7 @@ catch (err) {
         }
     });
 
-    router.get('/allusers',(req,res)=>{
+    router.get('/allusers',checkPermission(),(req,res)=>{
         Skill.find()
         .populate("followers","_id user_name")
         .then((skills)=>{
@@ -142,7 +143,7 @@ catch (err) {
         
     })
     
-    router.get('/userskills',(req,res)=>{
+    router.get('/userskills',checkPermission(),(req,res)=>{
         Skill.find({followers:req.body._id})
         .populate("followers")
         .then((skills)=>{
@@ -155,7 +156,7 @@ catch (err) {
     })
     
   //delete a skill
-    router.delete('/deleteskill/:id', async (req, res) => {
+    router.delete('/deleteskill/:id',checkPermission(), async (req, res) => {
         try {
             const skill = await Skill.findById(req.params.id);
             if (!skill) {
@@ -169,7 +170,7 @@ catch (err) {
         }
     });
     
-    router.post('/follow',async(req,res)=>{
+    router.post('/follow',checkPermission(),async(req,res)=>{
 		const skill = await Skill.findOne({ _id:req.body._id});
         console.log(skill)
 		const user = req.body.user_id

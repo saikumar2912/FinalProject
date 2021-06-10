@@ -1,8 +1,11 @@
 const express = require('express');
 const router =express.Router();
 const Post= require('../Model/Post');
+const Achivement=require('../Model/Achivement');
+const {checkPermission}=require('../Middleware/permission')
+
 // TO ADD A POST
-	router.post('/addpost', async (req, res) => {
+	router.post('/addpost',checkPermission(), async (req, res) => {
         const newpost = new Post(req.body);
 	try {
 		await newpost.save()
@@ -16,11 +19,11 @@ const Post= require('../Model/Post');
 //TO UPDATE A POST 
 
 router.patch('/updatepost', async (req, res) => {
-	const like={like:req.body.like}
+	const like={irrevelant_content:req.body.irrevelant_content}
 	const updates = Object.keys(like);
 	console.log(updates);
 	console.log(req.body);
-	const allowedUpdates = ['content','like','dislike'];
+	const allowedUpdates = ['irrevelant_content'];
 	 const isValidOperation = updates.every((update) => {
 		return allowedUpdates.includes(update);
 	});
@@ -47,18 +50,85 @@ router.patch('/updatepost', async (req, res) => {
 });
 
 
-router.post('/getpost',async(req,res)=>{
+router.post('/getpost',checkPermission(),async(req,res)=>{
 	try{
-		const post=await Post.find().populate("bit_id user_id skill_id")
+		const post=await Post.find().populate("bit_id user_id skill_id").sort({ createdAt: 'desc'})
 		res.send(post)
 	}catch(error)
 	{
 		res.status(500).send("not found")
 	}
 });
+router.post('/getposts', async (req, res) => {
+	try {
+		
+	// 	const post = await Post.find({}).populate("user_id").sort({createdAt: 'desc'})
+	// res.status(200).send(post).catch((e)=>console.log(e))
+	const post = await Post.aggregate([{
+		$lookup:{
+		 from:"users",
+		 localField:'user_id',
+		 foreignField:'_id',
+		 as:'user'
+		}
+	},{
+		$lookup:{
+		 from:"skills",
+		 localField:'skill_id',
+		 foreignField:'_id',
+		 as:'skill'
+		}
+	},{
+		$lookup:{
+		 from:"bits",
+		 localField:'bit_id',
+		 foreignField:'_id',
+		 as:'bit'
+		}
+	},
+	{$lookup:{
+		from:"reports",
+		localField:'_id',
+		foreignField:'post_id',
+		as:'reports'
 
-router.get('/allposts',(req,res)=>{
-	Post.find().populate("user_id skill_id bit_id","title Title user_name")
+	}},
+	{
+		$unwind:"$user"
+	},{
+		$unwind:"$skill"
+	},{
+		$unwind:"$bit"
+	},
+]).sort({createdAt: 'desc'})
+	
+	
+	res.status(200).send(post).catch((e)=>console.log(e))
+	} catch (err) {
+		res.status(500).send({error:err.message});
+	}
+})
+
+router.post('/posted/count',async(req,res)=>{
+	try{
+		const post = await Post.aggregate([{
+			$lookup:{
+             from:"reports",
+			 localField:'_id',
+			 foreignField:'post_id',
+			 as:'reports'
+			}
+		}])
+		console.log(post)
+		res.status(200).send(post)
+
+	}catch{
+
+	}
+})
+
+router.get('/allposts',checkPermission(),(req,res)=>{
+	Post.find().populate("user_id skill_id bit_id","title Title user_name").sort({ createdAt: 'desc'})
 	.then((data)=>{
 		res.status(201).send(data)
 	}).catch(err=>{
@@ -67,8 +137,9 @@ router.get('/allposts',(req,res)=>{
 	})
 	
 })
-router.get('/userposts',(req,res)=>{
-	Post.find({skill_id:req.body.skill_id}).populate("skill_id bit_id","title Title followers user_name")
+
+router.get('/userposts',checkPermission(),(req,res)=>{
+	Post.find({skill_id:req.body.skill_id}).populate("skill_id bit_id","title Title followers user_name").sort({ createdAt: 'desc'})
 	.then((data)=>{
 		res.status(201).send(data)
 	}).catch(err=>{
@@ -79,7 +150,7 @@ router.get('/userposts',(req,res)=>{
 })
 //user posts
 
-router.post('/user_idposts',async(req,res)=>{
+router.post('/user_idposts',checkPermission(),async(req,res)=>{
 	try{
 		const newpost=await Post.find({user_id:req.body.user_id}).populate("skill_id bit_id");
 		console.log(newpost);
@@ -94,7 +165,7 @@ router.post('/user_idposts',async(req,res)=>{
 //to get total post count
 router.post('/post/count',async (req,res)=>{
 	try{
-		const post=await Post.find({});
+		const post=await Post.find({skill_id:req.body.skill_id});
 		const count=post.length;
 		console.log(count);
 		res.status(200).send({"Total Post":count})
@@ -104,7 +175,19 @@ router.post('/post/count',async (req,res)=>{
 		res.status(500).send({ error: 'bit not found' });
 	}
 });
-router.post('/like',async(req,res)=>{
+
+
+router.post('/likes/counts',async(req,res)=>{
+	try{
+const post =await Post.find().sort({like:"desc"}).populate('skill_id bit_id user_id','Title Description photo title user_name')
+console.log(post)
+res.status(200).send(post)
+	}catch(err){
+res.status(500).send({error:err.message})
+	}
+})
+
+router.post('/like',checkPermission(),async(req,res)=>{
 	console.log(req.body)
 	const post = await Post.findOne({ _id:req.body._id});
 	const user = req.body.user_id
@@ -129,7 +212,7 @@ try {
 }
 })
 
-router.post('/dislike',async(req,res)=>{
+router.post('/dislike',checkPermission(),async(req,res)=>{
 	
 const post = await Post.findOne({ _id:req.body._id});
 	const user = req.body.user_id
@@ -158,12 +241,15 @@ router.post('/irrevelant',async(req,res)=>{
 	const post = await Post.findOne({ _id:req.body._id});
 	const user = req.body.user_id
 	console.log(user)
-	const irrevelant = post.irrevelant_content.includes(user)
+	const report={
+		user_id:req.body.user_id,
+		irrevelant_content:req.body.irrevelant_content
+	}
+	const irrevelant = post.irrevelant_content.includes(report)
 if (irrevelant === true) {
-	post.irrevelant_content.remove(user)
 }
 else{
-	post.irrevelant_content.push(user)
+	post.irrevelant_content.push(report)
 }
 try {
 	await post.save();
@@ -172,9 +258,14 @@ try {
 	res.status(500).send("invalid skill")
 }})
 
-router.delete('/deletepost/:id', async (req, res) => {
+router.delete('/deletepost/:id',checkPermission(), async (req, res) => {
 	try {
-		const post = await Post.findById(req.params.id);
+		const ID=req.params.id
+		const post = await Post.findById(ID);
+	// const achive= await Achivement.find()
+	//  console.log(achive.map(e=>e.achivement.map(a=>{if(a.toString() === ID.toString()){
+		 
+	//    } a.pop()  })))
 		if (!post) {
 			return res.status(404).send({ error: 'post not found' });
 		}
@@ -182,9 +273,19 @@ router.delete('/deletepost/:id', async (req, res) => {
 		res.send(post);
 
 	} catch (error) {
-		res.status(500).send({ error: 'Internal server error' });
+		res.status(500).send({ error: error.message });
 	}
 });
+
+router.post('/highposts',async(req,res)=>{
+	try{
+		const post=await Post.find().populate('skill_id bit_id user_id','title Title photo user_name').sort({popularity:"desc"}).limit(10)
+		res.status(200).send(post)
+
+	}catch(error){
+res.status(500).send({error:error.message})
+	}
+})
 
 
 
