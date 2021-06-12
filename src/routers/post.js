@@ -258,7 +258,7 @@ try {
 	res.status(500).send("invalid skill")
 }})
 
-router.delete('/deletepost/:id',checkPermission(), async (req, res) => {
+router.delete('/deletepost/:id', async (req, res) => {
 	try {
 		const ID=req.params.id
 		const post = await Post.findById(ID);
@@ -279,8 +279,44 @@ router.delete('/deletepost/:id',checkPermission(), async (req, res) => {
 
 router.post('/highposts',async(req,res)=>{
 	try{
-		const post=await Post.find().populate('skill_id bit_id user_id','title Title photo user_name').sort({popularity:"desc"}).limit(10)
-		res.status(200).send(post)
+		const post = await Post.aggregate([{
+			$lookup:{
+			 from:"users",
+			 localField:'user_id',
+			 foreignField:'_id',
+			 as:'user'
+			}
+		},{
+			$lookup:{
+			 from:"skills",
+			 localField:'skill_id',
+			 foreignField:'_id',
+			 as:'skill'
+			}
+		},{
+			$lookup:{
+			 from:"bits",
+			 localField:'bit_id',
+			 foreignField:'_id',
+			 as:'bit'
+			}
+		},
+		{$lookup:{
+			from:"reports",
+			localField:'_id',
+			foreignField:'post_id',
+			as:'reports'
+	
+		}},
+		{
+			$unwind:"$user"
+		},{
+			$unwind:"$skill"
+		},{
+			$unwind:"$bit"
+		},
+	]).sort({popularity: 'desc'})
+	res.status(200).send(post)
 
 	}catch(error){
 res.status(500).send({error:error.message})

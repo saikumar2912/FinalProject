@@ -71,10 +71,10 @@ try {
 	res.status(500).send({error:err.message});
 }
 })
-router.post('/status',checkPermission(),async (req, res) => {
+router.post('/status',async (req, res) => {
 	
 	try {
-		const status = await Verification.findOne({user_id:req.user_id});
+		const status = await Verification.findOne({user_id:req.body.user_id});
 		if (!status) {
 			return res.status(404).send({ error: 'Status not found' });
 		}

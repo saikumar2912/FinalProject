@@ -9,9 +9,9 @@ const User=require('../Model/User');
 const { CreateToken } = require('../Middleware/Token');
 const { checkPermission } = require('../Middleware/permission');
 const { Auth, LoginCredentials } = require("two-step-auth");
-const SERVICE_ID="VA5f6e5373a57974e5da22f5b7e92a3ce3"
-const ACCOUNT_SID="ACa96bbfb644ab21cc552c6159152896a0"
-const AUTH_TOKEN="82394a4fbc66f3082f517d9a422aeebb"
+const SERVICE_ID='VA704d3066ac418bb1f500e4e2ce00ed3b'
+const ACCOUNT_SID='ACd3908406c92b0f98f2df24d612ad2e39'
+const AUTH_TOKEN='14431a1050a8615655b23e6717dcd6ce'
 const client = require('twilio')(ACCOUNT_SID,AUTH_TOKEN);
 
 
@@ -236,7 +236,7 @@ router.post('/logins',(req,res)=>{
          
          else {
             res.status(400).send({
-                message: "Wrong phone number :(",
+                message: "Wrong phone number :",
                 phonenumber: req.body.phonenumber,
                 data
             })
@@ -248,33 +248,47 @@ router.post('/logins',(req,res)=>{
 
 
 // Verify Endpoint
-router.post('/verify', (req, res) => {
+router.post('/verify',(req,res)=>{
     console.log(req.body)
-    if (req.body.phoneNo && (req.body.code).length === 6) {
-        client
-            .verify
-            .services(SERVICE_ID)
-            .verificationChecks
-            .create({
-                to: `+${req.body.phoneNo}`,
-                code: req.body.code
+    User.findOne({phoneNo:req.body.phoneNo})
+    .then(user=>{
+        console.log(user)
+        if (req.body.phoneNo && (req.body.code).length === 6) {
+            client
+                .verify
+                .services(SERVICE_ID)
+                .verificationChecks
+                .create({
+                    to: `+${req.body.phoneNo}`,
+                    code: req.body.code
+                })
+                .then(data => {
+                    if (data.status === "approved") {
+                        let token = CreateToken(user)
+                    console.log(token)
+
+                        res.status(200).send({
+                            message: "User is Verified!!",
+                            data,token
+                        });
+                        token
+                    }
+              
+                })
+        } else {
+            res.status(400).send({
+                message: "Wrong phone number or code",
+                phonenumber: req.body.phoneNo,
+                data
             })
-            .then(data => {
-                if (data.status === "approved") {
-                    res.status(200).send({
-                        message: "User is Verified!!",
-                        data
-                    })
-                }
-            })
-    } else {
-        res.status(400).send({
-            message: "Wrong phone number or code",
-            phonenumber: req.body.phoneNo,
-            data
-        })
-    }
-})
+        }
+        
+         
+        
+        
+    })
+});
+
 
 
 

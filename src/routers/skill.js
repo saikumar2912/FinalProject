@@ -190,25 +190,37 @@ catch (err) {
 		res.status(500).send("invalid skill")
     }})
     
-    router.post('/unfollow',checkPermission(),async(req,res)=>{
-		const skill = await Skill.findOne({ _id:req.body._id});
-        console.log(skill)
-		const user = req.body.user_id
-        console.log(user)
-	    const unfollow = skill.followers.includes(user)
-	console.log(unfollow);
-	if (unfollow === true) {
-		skill.followers.remove(user)
-    }
-	else{
-		skill.followers.pull(user)
-	}
-	try {
-		await skill.save();
-		res.status(201).send(skill);
-	} catch (err) {
-		res.status(500).send("invalid skill")
-    }})
+  
     
+    router.patch('/updateskill/:id', async (req, res) => {
+	
+    const updates = Object.keys(req.body);
+    console.log(updates);
+    const allowedUpdates = ['Title'];
+    const isValidOperation = updates.every((update) => {
+        return allowedUpdates.includes(update);
+    });
+
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid Operation' });
+    }
+
+    try {
+        const skill = await Skill.findById(req.params.id)
+        console.log(skill);
+        if (!skill) {
+           
+            return res.status(404).send({ error: 'skill not found' });
+        }
+        updates.forEach((update) => {
+            skill[update] = req.body[update];
+        });
+        await skill.save();
+        res.send(skill);
+    } catch (err) {
+        res.status(500).send({error: err.message});
+    }
+
+});
 
 module.exports = router
