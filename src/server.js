@@ -9,13 +9,14 @@ const post = require('./Routers/post.js');
 const achive=require('./Routers/achivement')
 const report=require('./Routers/report')
 const verify=require('./Routers/verification')
+const quiz=require('./Routers/quiz')
+const results=require('./Routers/results')
 
 require('dotenv').config();
 let port = process.env.PORT;
 let db=process.env.DB;
 
 const app = express();
-
 app.use(express.json());
 app.use(cors());
 
@@ -39,6 +40,9 @@ app.use('/post',post);
 app.use('/achivement',achive);
 app.use('/report',report)
 app.use('/verify',verify)
+app.use('/quiz',quiz)
+app.use('/result',results)
+
 
 app.listen(port, () =>
     console.log(`Server running on port ${port}`));

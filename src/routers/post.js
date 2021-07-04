@@ -100,7 +100,7 @@ router.post('/getposts', async (req, res) => {
 	},{
 		$unwind:"$bit"
 	},
-]).sort({createdAt: 'desc'})
+]).sort({createdAt:'desc'})
 	
 	
 	res.status(200).send(post).catch((e)=>console.log(e))
@@ -315,13 +315,44 @@ router.post('/highposts',async(req,res)=>{
 		},{
 			$unwind:"$bit"
 		},
-	]).sort({popularity: 'desc'})
+	]).sort({popularity: 'desc'}).limit(10)
 	res.status(200).send(post)
 
 	}catch(error){
 res.status(500).send({error:error.message})
 	}
 })
+
+router.patch('/updatepost/:id', async (req, res) => {
+	
+    const updates = Object.keys(req.body);
+    console.log(updates);
+    const allowedUpdates = ['content'];
+    const isValidOperation = updates.every((update) => {
+        return allowedUpdates.includes(update);
+    });
+
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid Operation' });
+    }
+
+    try {
+        const post = await Post.findById(req.params.id)
+        console.log(post);
+        if (!post) {
+           
+            return res.status(404).send({ error: 'post not found' });
+        }
+        updates.forEach((update) => {
+            post[update] = req.body[update];
+        });
+        await post.save();
+        res.send(post);
+    } catch (err) {
+        res.status(500).send({error: err.message});
+    }
+
+});
 
 
 

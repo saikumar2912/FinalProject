@@ -56,6 +56,15 @@ router.post('/userachive',(req,res)=>{
 	})
 	
 })
+router.post('/allachive', async (req, res) => {
+        
+	try {
+		const skill = await Achivement.find({});
+		res.send(skill);
+	} catch (error) {
+		res.status(404).send({ error: 'Path not found' });
+	}
+});
 
 router.delete('/deleteachive/:id',async(req,res)=>{
 	try{

@@ -8,6 +8,7 @@ const {checkPermission}=require('../Middleware/permission')
 //to ADD BIT
 	router.post('/addbit',checkPermission(), async (req, res) => {
         const newbit = new Bit(req.body);
+
 	try {
 		await newbit.save()
 		.then((e)=>res.status(201).send({data:e}))
@@ -16,6 +17,34 @@ const {checkPermission}=require('../Middleware/permission')
 		res.status(500).send(newbit);
 	}
 });
+
+router.post('/addnewbit',async(req,res)=>{
+	const bit=new Bit(req.body);
+	const skill_id=req.body.skill_id
+const title=req.body.title
+console.log(title,bit)
+	try{
+		Bit.findOne({$and:[{title,skill_id}]}, function (err, result) {
+			if (err) {
+				throw (err);
+			}else if(!result){
+				try {
+					 bit.save()
+					.then((e)=>res.status(201).send({data:e}))
+					.catch((e)=> console.log(e))
+				} catch (err) {
+					res.status(500).send(bit);
+				}
+			}else{
+				res.send('already exists')
+			}
+		})
+		}
+		catch(err){
+res.send('error')
+	}
+	
+})
 router.post('/allbits',checkPermission(), async (req, res) => {
         
 	try {
@@ -81,7 +110,6 @@ router.post('/newskill',checkPermission(),async (req,res)=>{
 				skill_id:e.skill_id,
 				   bit_id:e._id,
 				   title:e.title,
-				   Description:e.Description
 			}
 		})
 		res.status(200).send({"bits":bitdetails})

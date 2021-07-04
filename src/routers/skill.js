@@ -7,18 +7,32 @@ const Skill=require('../Model/Skill')
 const Bit =require('../Model/Bit')
   //add a skill
  
- 
-  router.post('/addskill',checkPermission(), async (req, res) => {
-try {
-    const newskill = new Skill(req.body);
-
-    await newskill.save()
-    .then((e)=>res.status(201).send({data:e}))
-} 
-catch (err) {
-    res.status(404).send({err:"invalid data"});
-}
-}); 
+  router.post('/addskill',async(req,res)=>{
+	const skill=new Skill(req.body);
+const Title=req.body.Title
+console.log(Title,skill)
+	try{
+		Skill.findOne({Title}, function (err, result) {
+			if (err) {
+				throw (err);
+			}else if(!result){
+				try {
+					 skill.save()
+					.then((e)=>res.status(201).send({data:e}))
+					.catch((e)=> console.log(e))
+				} catch (err) {
+					res.status(500).send(skill);
+				}
+			}else{
+				res.send({message:'Already Exists'})
+			}
+		})
+		}
+		catch(err){
+res.send('error')
+	}
+	
+})
 // router.post('/adduser',async(req,res)=>{
 
 //     try{
@@ -156,7 +170,7 @@ catch (err) {
     })
     
   //delete a skill
-    router.delete('/deleteskill/:id',checkPermission(), async (req, res) => {
+    router.delete('/deleteskill/:id', async (req, res) => {
         try {
             const skill = await Skill.findById(req.params.id);
             if (!skill) {

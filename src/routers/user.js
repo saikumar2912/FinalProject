@@ -1,6 +1,7 @@
 
 const express = require('express');
 require('dotenv').config();
+var nodemailer = require('nodemailer');
 
 const router =express.Router();
 const bcrypt =require('bcryptjs');
@@ -9,12 +10,13 @@ const User=require('../Model/User');
 const { CreateToken } = require('../Middleware/Token');
 const { checkPermission } = require('../Middleware/permission');
 const { Auth, LoginCredentials } = require("two-step-auth");
-const SERVICE_ID='VA704d3066ac418bb1f500e4e2ce00ed3b'
-const ACCOUNT_SID='ACd3908406c92b0f98f2df24d612ad2e39'
-const AUTH_TOKEN='14431a1050a8615655b23e6717dcd6ce'
+const SERVICE_ID=process.env.SERVICE_ID
+const ACCOUNT_SID=process.env.ACCOUNT_SID
+const AUTH_TOKEN=process.env.AUTH_TOKEN
 const client = require('twilio')(ACCOUNT_SID,AUTH_TOKEN);
+const Verification= require('../Model/Verification')
 
-
+console.log(process.env.ACCOUNT_SID)
 // const mailgun = require("mailgun-js");
 // const API="5f81dfa9359ffd562f3947a45686d95e-fa6e84b7-62f99bf9"
 // const JWT_ACC="accountactivated"
@@ -65,10 +67,11 @@ console.log(email);
 
 router.post('/login',(req,res)=>{
     var password=req.body.password
-
+ 
     User.findOne({$or:[{email_id:req.body.user},{phoneNo:req.body.user}]})
     .then(user=>{
-        if(user){
+        console.log(user)
+        if(user.status==='Verified'){
             bcrypt.compare(password,user.password,function(err,result){
                 if(err){
                     res.json({
@@ -83,7 +86,7 @@ router.post('/login',(req,res)=>{
                     token
                 }else{
                     res.json({
-                        message:'please enter the correct password'
+                        message:'Invalid Password'
                     })
                 }
             })
@@ -96,7 +99,15 @@ router.post('/login',(req,res)=>{
     })
 });
 
-
+router.post('/allusers',async(req,res)=>{
+    try{
+const user=await User.find()
+res.status(201).send(user)
+    }
+    catch(err) {
+res.status(500).send({error:err.message})
+    }
+})
 router.post('/particularUser',checkPermission(), async (req, res) => {
 	try {
 	  const user = await User.findOne({_id:req.user_id});
@@ -172,46 +183,50 @@ router.post('/forgetPassword', async (req, res) => {
 
 })
 
+router.post('/adminVerification',async(req,res)=>{
+	const post = await User.findOne({ email_id:req.body.email_id})
+	const email = post.email_id;
+	const name =  post.user_name;
+	post.status = req.body.status
+try {
+	await post.save().catch(e=>console.log(e))
+	if(post.status === 'Verified'){
+		var transporter = nodemailer.createTransport({
+			service: 'outlook',
+			auth: {
+				user: 'buildout2021@outlook.com',
+				pass: 'Varalakshmi1$'
+			}
+		  });
+		  console.log(email);
+		  var mailOptions = {
+			from: 'buildout2021@outlook.com',
+			to: `${email}`,
+			subject: 'Account verification',
+			text: `Hi ${name} your account has been ${post.status}! you can post your idea's`
+		  };
+		  
+		  transporter.sendMail(mailOptions, function(error, info){
+			if (error) {
+			  console.log(error);
+			} else {
+			  console.log('Email sent: ' + info.response);
+			}
+		  });	
+	}
 
+} catch (err) {
+	res.status(500).send({error:err.message});
+}
+res.status(201).send(post);
+})
   
 
-// router.post('/verify',async function login(emailId) {
-//     const ress = await Auth(emailId);
-//     // You can follow this approach,
-//     // but the second approach is suggested,
-//     // as the mails will be treated as important
-//     const res = await Auth(emailId, "LOVE YOU");
-//     console.log(ress);
-//     console.log(ress.mail);
-//     console.log(ress.OTP);
-//     console.log(ress.success);
-
-//   }
-    
-
-// )
-
-
-// router.post('/verifyy',async(req,res)=>{
-//         try {
-//             const ress = await Auth("ksai4666@gmail.com", "Company Name");
-//             console.log(ress);
-//             console.log(ress.mail);
-//             console.log(ress.OTP);
-//             console.log(ress.success);
-//         } catch (error) {
-//             console.log(error)
-//         }
-//     console.log(Auth())
-    
-//     LoginCredentials.mailID = "ksai4666@gmail.com" //This should have less secure apps enabled
-//     LoginCredentials.password = "Your password" // you can store them in your env variables and access them, it will work fine
-//     LoginCredentials.use = true
-    
-// })
 
 router.post('/logins',(req,res)=>{
     console.log(req.body)
+    console.log(process.env)
+
     User.findOne({phoneNo:req.body.phoneNo})
     .then(user=>{
         console.log(user)
@@ -290,66 +305,19 @@ router.post('/verify',(req,res)=>{
 });
 
 
+router.delete('/deleteuser/:_id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params._id);
+        if (!user) {
+            return res.status(404).send({ error: 'user not found' });
+        }
+        user.remove()
+        res.send({message:"Rejected"});
 
-
-// //to add movie
-// router.post('/signup',(req,res)=>{
-//     const {name,email,password,role}=req.body;
-//     User.findOne({email}).exec((err,user)=>{
-//         if(user){
-//             return res.status(400).json({error:"already exits"});
-//         }
-// const token=jwt.sign({name,email,password,role},JWT_ACC,{expiresIn:'20m'})
-
-//         const data = {
-//             from: 'BuildOut@gmail.com',
-//             to: email,
-//             subject: 'ACCOUNT ACTIVATION SENT',
-//             html:`<h2>please click the link to activate your account</h2> <p>${CLIENT_URL}/authentication/activate/${token} </p> `
-//         };
-//         mg.messages().send(data, function (error, body) {
-//             if(error){
-//                 return res.json({message:error.message})
-//             }
-//             return res.json({message:"Email has been send "})
-//         });
-//  })
-// })
-// router.post('/login',(req,res)=>{
-//     const {token}=req.body;
-//     if(token){
-// jwt.verify(token,JWT_ACC,function(err,decodedToken){
-//     if(err){
-//         return res.status(400).json({error:"incorrect or expired link"})
-//     }
-//     const{name,email,password}=decodedToken;
-//     User.findOne({email}).exec((err,user)=> {
-//         if(user){
-//         return res.status(400).json({error:"already exits"});
-//     }
-//     let newUser= new User({name,email,password});
-//     newUser.save((err,success)=>{
-//         if(err){
-//          console.log("error in signup while activation",err);
-//         return res.status(400),json({error:"error activating account"})
-//       }
-//       res.json({
-//           message:"signup success"      
-//         })
-//     })
-//     })
-// })
-//     }else{
-//         return res.json({error:"something went wrong"})
-//     }
-// })
-
-
-
-
-
-
-
+    } catch (error) {
+        res.status(500).send({ error: 'Internal server error' });
+    }
+});
 
 
 module.exports = router;

@@ -38,7 +38,10 @@ const UserSchema= new Schema({
         required:false,
         default:"Not Mentioned"
     },
-
+status:{
+    type:String,
+    default:"notVerified"
+}
 
 },{timestamps:true});
 module.exports = User = mongoose.model('user', UserSchema)

@@ -14,10 +14,13 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
+    "csvtojson": "^2.0.10",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.6",
     "email-validator": "^2.0.4",
     "express": "^4.17.1",
+    "fast-csv": "^4.3.6",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "mongoose": "^5.11.19",
@@ -25,6 +28,7 @@
     "nodemailer": "^6.6.1",
     "twilio": "^3.63.0",
     "two-step-auth": "^1.1.2",
+    "xlsx": "^0.17.0",
     "xpress": "^2.4.6"
   },
   "devDependencies": {

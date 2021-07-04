@@ -6,10 +6,6 @@ const BitSchema = new Schema({
         type:String,
         required:true
     },
-    Description:{
-        type:String,
-        required:false
-    },
     skill_id:{
         type:Schema.Types.ObjectId,
         ref:'skill'
