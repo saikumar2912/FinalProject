@@ -1,27 +1,47 @@
 const mongoose= require('mongoose');
 const Schema =mongoose.Schema;
-
+const {ObjectId} = mongoose.Schema.Types
 
 const UserSchema= new Schema({
-    name:{
+    user_name:{
         type:String,
         required:true
     },
-    age:{
-        type:Number,
-        required:true
-    },
-    email:{
+    email_id:{
         type:String,
         required:true
-    },
-    phone:{
-        type:Number,
+     },
+    phoneNo:{
+        type:String,
         required:true
     },
     password:{
         type:String,
         required:true
-    }
-})
-module.exports = User = mongoose.model('explore', UserSchema)
+    },
+    role:{
+        type:String,
+        default:"user"
+    },
+    profile_picture:{
+        type:String,
+        required:false,
+        default:""
+    },
+    Education:{
+        type:String,
+        required:false,
+        default:"Not Mentioned"
+    },
+    Bio:{
+        type:String,
+        required:false,
+        default:"Not Mentioned"
+    },
+status:{
+    type:String,
+    default:"notVerified"
+}
+
+},{timestamps:true});
+module.exports = User = mongoose.model('user', UserSchema)

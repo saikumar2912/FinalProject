@@ -6,13 +6,9 @@ const BitSchema = new Schema({
         type:String,
         required:true
     },
-    Description:{
-        type:String,
-        required:true
-    },
-    skillId:{
+    skill_id:{
         type:Schema.Types.ObjectId,
         ref:'skill'
     }
-    })
+    },{timestamps:true})
     module.exports = Bit = mongoose.model('bit', BitSchema)
