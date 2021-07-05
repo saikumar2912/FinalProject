@@ -2,6 +2,11 @@ const express = require('express');
 const router =express.Router();
 const Bit =require('../Model/Bit');
 const Skill=require('../Model/Skill')
+const Post=require('../Model/Post')
+const Reports=require('../Model/Report')
+const Quiz= require('../Model/Quiz')
+const TestResults =require('../Model/TestResults')
+
 const {checkPermission}=require('../Middleware/permission')
 
 
@@ -120,19 +125,7 @@ router.post('/newskill',checkPermission(),async (req,res)=>{
 	}
 });
 
-router.delete('/delete_bit/:id', async (req, res) => {
-	try {
-		const bit = await Bit.findById(req.params.id);
-		if (!bit) {
-			return res.status(404).send({ error: 'bit not found' });
-		}
-		bit.remove()
-		res.send(bit);
 
-	} catch (error) {
-		res.status(500).send({ error: 'Internal server error' });
-	}
-});
 router.patch('/updatebit/:id', async (req, res) => {
 	
     const updates = Object.keys(req.body);
@@ -163,5 +156,78 @@ router.patch('/updatebit/:id', async (req, res) => {
     }
 
 });
+router.delete('/delete_bit/:id', async (req, res) => {
+	// console.log("delete post",req.body._id);
+	try {
+		const bit = await Bit.findById(req.params.id,(err,p)=>{
+			
+              if(err){
+				  console.log(err);
+			  }
+			  else{
+				Post.find({},(err,c)=>{
+					if(err){
+						console.log(err);
+					}else{
+
+						Reports.find({},(err,r)=>{
+							if(err){
+								console.log(err)
+							}
+							else{
+								Quiz.find({},(err,q)=>{
+									if(err){
+										console.log(err)
+									}else{
+                                        TestResults.find({},(err,t)=>{
+											if(err){
+												console.log(err)
+											}
+											else{
+												q.map((quiz)=>{
+													t.map((result)=>{
+														if(p._id.toString()===result.bit_id.toString()){
+															return result.remove()
+														}
+													})
+												})
+											}
+											q.map((s)=>{
+												if(p._id.toString()===s.bit_id.toString()){
+													return s.remove()
+												}
+											})
+										})
+									}
+								})
+								c.map((post)=>{
+									console.log(post,'7')
+									r.map((reports)=>{
+
+										if(post._id.toString()===reports.post_id.toString()){
+											 reports.remove()
+										}
+									})
+								})		
+							}
+						})
+					}c.map((e)=>{
+						if(p._id.toString() ===e.bit_id.toString() ){
+							 return e.remove()
+						}
+						console.log(e)
+					})
+
+					
+					
+				})
+			}
+		})
+		bit.remove()
+	res.send(post)
+	}
+			catch{
+				res.send("bit not found")
+			}})
 
 module.exports = router;

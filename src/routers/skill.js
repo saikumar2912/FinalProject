@@ -5,6 +5,10 @@ const router =express.Router();
 const User =require('../Model/User')
 const Skill=require('../Model/Skill')
 const Bit =require('../Model/Bit')
+const Post=require('../Model/Post')
+const Reports=require('../Model/Report')
+const Quiz= require('../Model/Quiz')
+const TestResults =require('../Model/TestResults')
   //add a skill
  
   router.post('/addskill',async(req,res)=>{
@@ -169,7 +173,7 @@ res.send('error')
         
     })
     
-  //delete a skill
+  
     router.delete('/deleteskill/:id', async (req, res) => {
         try {
             const skill = await Skill.findById(req.params.id);
@@ -236,5 +240,172 @@ res.send('error')
     }
 
 });
+
+// router.delete('/deleteskill/:id',async(req,res)=>{
+// try{
+//     const skill = await Skill.findById(req.params.id,(err,s)=>{
+//         if(err){
+//             console.log(err)
+//         }else{
+//             Bit.find({},(err,p)=>{
+//                 if(err){
+//                     console.log(er)
+//                 }else{
+//                     Post.find({},(err,c)=>{
+//                         if(err){
+//                             console.log(err);
+//                         }else{
+//                             Reports.find({},(err,r)=>{
+//                                 if(err){
+//                                     console.log(err)
+//                                 }
+//                                 else{
+//                                     Quiz.find({},(err,q)=>{
+//                                         if(err){
+//                                             console.log(err)
+//                                         }else{
+//                                             TestResults.find({},(err,t)=>{
+//                                                 if(err){
+//                                                     console.log(err)
+//                                                 }
+//                                                 else{
+//                                                     q.map((quiz)=>{
+//                                                         t.map((result)=>{
+//                                                             if(p._id.toString()===result.bit_id.toString()){
+//                                                                 return result.remove()
+//                                                             }
+//                                                         })
+//                                                     })
+//                                                 }
+//                                                 q.map((s)=>{
+//                                                     if(p._id.toString()===s.bit_id.toString()){
+//                                                         return s.remove()
+//                                                     }
+//                                                 })
+//                                             })
+//                                         }
+//                                     })
+//                                     c.map((post)=>{
+//                                         console.log(post,'7')
+//                                         r.map((reports)=>{
+    
+//                                             if(post._id.toString()===reports.post_id.toString()){
+//                                                  reports.remove()
+//                                             }
+//                                         })
+//                                     })		
+//                                 }
+//                             })
+//                         }c.map((e)=>{
+//                             console.log(p)
+//                             console.log(e)
+//                             if(p._id.toString() ===e.bit_id.toString() ){
+//                                  return e.remove()
+//                             }
+//                             console.log(e)
+//                         })
+    
+                        
+                        
+//                     })
+//                 }p.map((a)=>{
+//                     if(s._id.toString()===a.skill_id){
+//                         return a.remove()
+//                     }
+//                 })
+//             })
+//         }
+//     })
+//     skill.remove()
+
+// }catch{
+//     res.send('skill not found')
+// }
+
+// })
+// router.delete('/deletePost/:id', async (req, res) => {
+// 	// console.log("delete post",req.body._id);
+// 	try {
+// 		const skill = await Skill.findById(req.params.id,(err,s)=>{
+// 			if(err){
+//                 console.log(err)
+//             }else{
+//                 Bit.find({},(err,p)=>{
+//                     if(err){
+//                         console.log(err);
+//                     }
+//                     else{
+//                         Post.find({},(err,c)=>{
+//                             if(err){
+//                                 console.log(err);
+//                             }else{
+        
+//                                 Reports.find({},(err,r)=>{
+//                                     if(err){
+//                                         console.log(err)
+//                                     }
+//                                     else{
+//                                         Quiz.find({},(err,q)=>{
+//                                             if(err){
+//                                                 console.log(err)
+//                                             }else{
+//                                                 TestResults.find({},(err,t)=>{
+//                                                     if(err){
+//                                                         console.log(err)
+//                                                     }
+//                                                     else{
+//                                                         q.map((quiz)=>{
+//                                                             t.map((result)=>{
+//                                                                 if(p._id.toString()===result.bit_id.toString()){
+//                                                                     return result.remove()
+//                                                                 }
+//                                                             })
+//                                                         })
+//                                                     }
+//                                                     q.map((s)=>{
+//                                                         if(p._id.toString()===s.bit_id.toString()){
+//                                                             return s.remove()
+//                                                         }
+//                                                     })
+//                                                 })
+//                                             }
+//                                         })
+//                                         c.map((post)=>{
+//                                             console.log(post,'7')
+//                                             r.map((reports)=>{
+        
+//                                                 if(post._id.toString()===reports.post_id.toString()){
+//                                                      reports.remove()
+//                                                 }
+//                                             })
+//                                         })		
+//                                     }
+//                                 })
+//                             }c.map((e)=>{
+//                                 if(p._id.toString() ===e.bit_id.toString() ){
+//                                      return e.remove()
+//                                 }
+//                                 console.log(e)
+//                             })
+        
+                            
+                            
+//                         })
+//                     }p.map((a)=>{
+//                         if(s._id.toString()===a.skill_id.toString()){
+//                             return a.remove()
+//                         }
+//                     })
+//                 })
+//             }
+              
+			 
+// 		})
+// 		skill.remove()
+// 	res.send(skill)
+// 	}
+// 			catch{
+// 				res.send("skill not found")
+// 			}})
 
 module.exports = router
